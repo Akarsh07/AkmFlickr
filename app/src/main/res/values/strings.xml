@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">AkmFlickr</string>
+    <string name="no_internet">No Internet available. Click to Reload</string>
+</resources>

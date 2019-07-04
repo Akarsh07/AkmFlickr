@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable name="item"
+            type="com.akm.flickr.model.FlickrPublicPhotosModel.Item"/>
+
+        <variable name="index"
+            type="Integer"/>
+
+        <variable
+            name="itemClickListener"
+            type="com.akm.flickr.adapter.RecyclerViewArrayAdapter.OnItemClickListener" />
+    </data>
+
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_marginEnd="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_marginTop="5dp"
+        android:onClick="@{(view)-> itemClickListener.onItemClick(view, index, item)}">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/ic_flickr"
+            android:layout_gravity="center"
+            android:layout_marginBottom="25dp"/>
+
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            app:src="@{item.media.m}"
+            android:scaleType="centerCrop"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_gravity="bottom"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:text="@{item.title.length() > 0 ? item.title : `No Name`}"
+            android:gravity="center"
+            android:background="#2d000000"/>
+    </FrameLayout>
+
+
+
+</layout>
