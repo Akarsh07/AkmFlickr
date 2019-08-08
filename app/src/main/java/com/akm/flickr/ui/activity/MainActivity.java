@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -15,8 +16,12 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.TextView;
 
 import com.akm.flickr.R;
 import com.akm.flickr.adapter.DataBindingAdapter;
@@ -38,6 +43,8 @@ public class MainActivity extends BaseActivity implements RecyclerViewArrayAdapt
     private ActivityMainBinding binding;
     private Animator currentAnimator;
     private int shortAnimationDuration;
+    private RecyclerViewArrayAdapter adapter;
+    private List<FlickrPublicPhotosModel.Item> arrayList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,66 +52,99 @@ public class MainActivity extends BaseActivity implements RecyclerViewArrayAdapt
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
         init();
+        getImages("nature");
     }
 
     private void init(){
-        if(NetworkUtility.isNetworkConnected(this))
-            getImages();
-        else
-            binding.tvMsg.setText((getString(R.string.no_internet)));
-
-        shortAnimationDuration = getResources().getInteger(
-                android.R.integer.config_shortAnimTime);
-    }
-
-    public void onClick(View view){
-        if(NetworkUtility.isNetworkConnected(this))
-            getImages();
-        else
-            binding.tvMsg.setText((getString(R.string.no_internet)));
-    }
-
-    public void getImages(){
-        enableLoader();
-        mApiService.getImages("nature", "json", "1").enqueue(new Callback<FlickrPublicPhotosModel>() {
-            @RequiresApi(api = Build.VERSION_CODES.N)
-            @Override
-            public void onResponse(Call<FlickrPublicPhotosModel> call, Response<FlickrPublicPhotosModel> response) {
-
-                disableLoader();
-                if(response.code() == 200) {
-                    try {
-                        List<FlickrPublicPhotosModel.Item> arrayList = response.body().getItems();
-                        rView(arrayList);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    binding.tvMsg.setText("No data found. Click to reload");
-                }
-            }
-
-            @Override
-            public void onFailure(Call<FlickrPublicPhotosModel> call, Throwable t) {
-                disableLoader();
-                binding.tvMsg.setText("No data found. Click to reload");
-            }
-        });
-    }
-
-    private void rView(List arrayList) {
-
-        RecyclerViewArrayAdapter adapter = new RecyclerViewArrayAdapter( arrayList, this);
+        adapter = new RecyclerViewArrayAdapter( arrayList,
+                this);
 
         RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(this, 2);
         binding.rView.setLayoutManager(mLayoutManager);
         binding.rView.setItemAnimator(new DefaultItemAnimator());
         binding.rView.setAdapter(adapter);
+
+        shortAnimationDuration = getResources().getInteger(
+                android.R.integer.config_shortAnimTime);
+
+        binding.etSearch.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+
+                        if(binding.etSearch.getText().toString().trim().length() != 0) {
+                            hideKeyboard();
+
+                            adapter.setUserPhotos(false);
+                            getImages(binding.etSearch.getText().toString().trim());
+                        }
+
+                        return true;
+
+                }
+                return false;
+            }
+        });
+
+        hideKeyboard();
+    }
+
+    private void hideKeyboard() {
+        InputMethodManager in = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        in.hideSoftInputFromWindow(binding.etSearch.getWindowToken(), 0);
+    }
+
+    public void onClick(View view){
+        if(NetworkUtility.isNetworkConnected(this))
+            getImages("nature");
+        else
+            binding.tvMsg.setText((getString(R.string.no_internet)));
+    }
+
+    public void getImages(String tag){
+        getImages(tag, "");
+    }
+
+    public void getImages(String tag, String id){
+        if(NetworkUtility.isNetworkConnected(this)) {
+            enableLoader();
+            mApiService.getImages(tag, "json", "1", id).enqueue(new Callback<FlickrPublicPhotosModel>() {
+                @RequiresApi(api = Build.VERSION_CODES.N)
+                @Override
+                public void onResponse(Call<FlickrPublicPhotosModel> call, Response<FlickrPublicPhotosModel> response) {
+
+                    disableLoader();
+                    if (response.code() == 200) {
+                        try {
+                            arrayList = response.body().getItems();
+                            adapter.notiftAdapter(arrayList);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        binding.tvMsg.setText("No data found. Click to reload");
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<FlickrPublicPhotosModel> call, Throwable t) {
+                    disableLoader();
+                    binding.tvMsg.setText("No data found. Click to reload");
+                }
+            });
+        } else
+            binding.tvMsg.setText((getString(R.string.no_internet)));
+
     }
 
     @Override
     public void onItemClick(View view, int position, FlickrPublicPhotosModel.Item object) {
-        zoomImageFromThumb(view, object.getMedia().getM());
+
+        if(view.getId() == R.id.tvViewMore){
+            getImages("", object.getAuthorId());
+            adapter.setUserPhotos(true);
+        } else
+            zoomImageFromThumb(view, object.getMedia().getM());
 
     }
 

@@ -33,6 +33,7 @@ public class RecyclerViewArrayAdapter<T>
     private TextView emptyTextView;
     private int emptyViewText = R.string.app_name;
     private Fragment fragment;
+    private boolean isUserPhotos;
 
     public void setEmptyTextView(TextView emptyTextView, @StringRes int emptyViewText) {
         this.emptyTextView = emptyTextView;
@@ -40,12 +41,18 @@ public class RecyclerViewArrayAdapter<T>
     }
 
 
-    public void setFragment(Fragment fragment) {
-        this.fragment = fragment;
+    public void setUserPhotos(boolean isUserPhotos) {
+        this.isUserPhotos = isUserPhotos;
+    }
+
+    public void notiftAdapter(List<T> mObjects){
+        this.mObjects = mObjects;
+        notifyDataSetChanged();
+
     }
 
     public interface OnItemClickListener<T> {
-        public void onItemClick(View view, int position, T object);
+        void onItemClick(View view, int position, T object);
     }
 
     public RecyclerViewArrayAdapter(final List<T> objects) {
@@ -68,6 +75,7 @@ public class RecyclerViewArrayAdapter<T>
         holder.getBinding().setVariable(BR.item, getItem(position));
         holder.getBinding().setVariable(BR.itemClickListener, onItemClickListener);
         holder.getBinding().setVariable(BR.index, ( position + 1));
+        holder.getBinding().setVariable(BR.isUser, isUserPhotos);
     }
 
     @Override

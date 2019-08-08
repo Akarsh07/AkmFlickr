@@ -13,6 +13,7 @@ public interface ApiService {
 
     @GET("services/feeds/photos_public.gne")
     @Headers("Content-Type: application/json")
-    Call<FlickrPublicPhotosModel> getImages(@Query("tags") String tag,@Query("format") String format, @Query("nojsoncallback") String cb);
+    Call<FlickrPublicPhotosModel> getImages(@Query("tags") String tag,@Query("format") String format, @Query("nojsoncallback") String cb,
+                                            @Query("id") String id);
 
 }

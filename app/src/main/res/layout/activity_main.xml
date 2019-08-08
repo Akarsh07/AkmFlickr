@@ -17,11 +17,38 @@
             android:layout_gravity="center"
             android:onClick="onClick"/>
 
-        <android.support.v7.widget.RecyclerView
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/rView"
-            android:layout_margin="5dp"/>
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+            <EditText
+                android:id="@+id/etSearch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/search_hint"
+                android:background="@drawable/bottom_line"
+                android:padding="8dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="10dp"
+                android:imeOptions="actionSearch"
+                android:inputType="text" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:text="Flickr Images"
+                android:layout_gravity="center"
+                android:padding="10dp"
+                android:textColor="#be2dbb"/>
+            <android.support.v7.widget.RecyclerView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/rView"
+                android:layout_margin="5dp"/>
+
+        </LinearLayout>
 
         <ImageView android:id="@+id/ivFullView"
             android:layout_width="match_parent"
